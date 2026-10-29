@@ -166,6 +166,38 @@
 
     <!-- Application Logic -->
     <script>
+        // Variabile per memorizzare il Wake Lock
+let wakeLock = null;
+
+// Funzione per richiedere di mantenere lo schermo acceso
+async function requestWakeLock() {
+    try {
+        // Verifica se il browser supporta la funzione
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Schermo sempre attivo attivato.');
+            
+            wakeLock.addEventListener('release', () => {
+                console.log('Schermo sempre attivo disattivato.');
+            });
+        }
+    } catch (err) {
+        console.error(`Errore Wake Lock: ${err.name}, ${err.message}`);
+    }
+}
+
+// 1. Attiva il blocco appena la pagina viene caricata
+document.addEventListener('DOMContentLoaded', () => {
+    requestWakeLock();
+});
+
+// 2. Se abbassi l'app a icona per rispondere a un messaggio e poi la riapri,
+// il sistema operativo revoca il blocco. Questo lo riattiva in automatico.
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        requestWakeLock();
+    }
+});
         // Stato dell'applicazione
         const state = {
             eanCounts: {}, // Formato: { "123456789": 5, "987654321": 2 }
